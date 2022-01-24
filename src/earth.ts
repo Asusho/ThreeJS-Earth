@@ -70,7 +70,7 @@ class Earth {
 
         let loader = new THREE.TextureLoader();
 
-        let earthDiffuseMap = loader.load("Images/uv3.jpg");
+        let earthDiffuseMap = loader.load("Images/uv.jpg");
         let earthHeightMap = loader.load("Images/earth_heightmap.jpg");
         let earthSpecularMap = loader.load("Images/specular.png");
         let earthHNormalMap = loader.load("Images/EarthNormal.png");
@@ -119,6 +119,7 @@ class Earth {
 
 
         var earthMesh = new THREE.Mesh(earthGeometry, basicMaterial);
+        earthMesh.name = "earth";
 
         scene.add(earthMesh);
 
@@ -149,7 +150,7 @@ class Earth {
             TWO: THREE.TOUCH.ROTATE,
         }
 
-        controls.minDistance = 15;
+        controls.minDistance = 12;
         controls.maxDistance = 50;
 
 
