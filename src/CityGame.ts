@@ -58,7 +58,7 @@ class CityGame {
     public drawCityFromLongLat(scene, city, color) {
         let { x, y, z } = this.earth.convertLongLatToSpherePos(city.long, city.lat);
 
-        let sphere = new THREE.SphereGeometry(0.05, 8, 8);
+        let sphere = new THREE.SphereGeometry(this.earth.RADIUS/200, 8, 8);
 
         var cityMat = new THREE.MeshBasicMaterial({
             color: new THREE.Color(color)
@@ -93,7 +93,7 @@ class CityGame {
         for (let i = 0; i <= 20; i++) {
             let p = new THREE.Vector3().lerpVectors(p1, p2, i / 20)
             p.normalize()
-            p.multiplyScalar(10 + 0.5 * Math.sin(Math.PI * i / 20));
+            p.multiplyScalar(this.earth.RADIUS + this.earth.RADIUS/ 20 * Math.sin(Math.PI * i / 20));
             pts.push(p)
         }
 
@@ -178,6 +178,8 @@ class CityGame {
 
             }
             let clickedPoint = obj?.point;
+
+            console.log(clickedPoint);
 
             if (pointMesh == null) pointMesh = self.drawCityFromLongLat(scene, { long: 0, lat: 0 }, 0xffffff);
 

@@ -23,17 +23,31 @@ class App {
         renderer.setSize(width, height);
         document.body.appendChild(renderer.domElement);
 
+		console.log(renderer);
+
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(45, width / height, 0.01, 10000);
 	
-	
-		camera.position.set(0, 0, 20);
+
+
+		window.addEventListener( 'resize', onWindowResize, false );
+
+function onWindowResize(){
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+}
 
 
 		let earth = new Earth(scene,camera,renderer);
 		 //new Test();
 		
 		let game = new CityGame(scene,camera,earth,renderer);
+
+
 
 	}
 

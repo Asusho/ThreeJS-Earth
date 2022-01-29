@@ -14,6 +14,7 @@
         "@types/geojson": "^7946.0.8",
         "html-webpack-plugin": "^5.5.0",
         "three": "^0.136.0",
+        "three-geojson-geometry": "^1.1.6",
         "ts-loader": "^9.2.6",
         "webpack": "^5.66.0",
         "webpack-dev-server": "^4.7.3"
