@@ -11,7 +11,7 @@ import { Test } from "./test";
 
 class App {
 
-	
+
 
 
 
@@ -20,33 +20,32 @@ class App {
 		const renderer = new THREE.WebGLRenderer();
 		let height = window.innerHeight;
 		let width = window.innerWidth;
-        renderer.setSize(width, height);
-        document.body.appendChild(renderer.domElement);
+		renderer.setSize(width, height);
+		document.body.appendChild(renderer.domElement);
 
 		console.log(renderer);
 
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(45, width / height, 0.01, 10000);
-	
 
 
-		window.addEventListener( 'resize', onWindowResize, false );
 
-function onWindowResize(){
+		window.addEventListener('resize', onWindowResize, false);
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+		function onWindowResize() {
 
-    renderer.setSize( window.innerWidth, window.innerHeight );
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
 
-}
+			renderer.setSize(window.innerWidth, window.innerHeight);
+
+		}
 
 
-		let earth = new Earth(scene,camera,renderer);
-		 //new Test();
-		
-		let game = new CityGame(scene,camera,earth,renderer);
+		let earth = new Earth(scene, camera, renderer);
+		//new Test();
 
+		let game = new CityGame(scene, camera, earth, renderer);
 
 
 	}

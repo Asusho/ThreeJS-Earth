@@ -1,5 +1,6 @@
 const fragmentShader = `
 uniform sampler2D texture1;
+uniform sampler2D borderMap;
 uniform vec2 mousePos;
 varying vec2 vUv;
 
@@ -12,21 +13,28 @@ void main() {
     vec2 st = gl_FragCoord.xy;
   
     vec2 mouse = vec2(mousePos)/vec2(resolution);
-  
-  
     float dist = distance(st, mousePos);
 
-    if(dist < 10.0){
-        vec4 texel0, texel1, resultColor;
-        texel0 = texture2D(texture1, vUv);
-        texel1 = vec4(color,1.0);
-        resultColor = mix(texel0, texel1, 0.5);
-     gl_FragColor = resultColor;
-    }
-    else{
-        gl_FragColor = texture2D(texture1, vUv);
-    }
+    vec4 border = texture2D(borderMap,vUv);
 
+   if(border.x > 0.5){
+        vec4 red = vec4(1.0,0.0,0.0,1.0);
+        vec4 texture = texture2D(texture1, vUv);
+        vec4 resultColor = mix(texture, red, 0.5);
+        gl_FragColor = resultColor;
+   }
+   else{
+        if(dist < 10.0){
+            vec4 texel0, texel1, resultColor;
+            texel0 = texture2D(texture1, vUv);
+            texel1 = vec4(color,1.0);
+            resultColor = mix(texel0, texel1, 0.5);
+            gl_FragColor = resultColor;
+        }
+        else{
+            gl_FragColor = texture2D(texture1, vUv);
+        }
+    }
 
 }
 `
