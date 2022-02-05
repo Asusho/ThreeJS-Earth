@@ -12,7 +12,9 @@ class QuizDiv {
     public nextBtn;
 
     public scoreTxt;
-    public roundTxt
+    public roundTxt;
+    public endDiv;
+    public endTxt;
 
     public game : CityGame;
 
@@ -49,12 +51,12 @@ class QuizDiv {
 
         d.appendChild(this.validateGuessBtn);
 
-        this.nextBtn = document.createElement("button");
-        this.nextBtn.className = "nextBtn";
-        this.nextBtn.innerText = "Next";
+        // this.nextBtn = document.createElement("button");
+        // this.nextBtn.className = "nextBtn";
+        // this.nextBtn.innerText = "Next";
 
 
-        d.appendChild(this.nextBtn);
+        // d.appendChild(this.nextBtn);
         content.appendChild(d);
 
 
@@ -66,6 +68,33 @@ class QuizDiv {
         this.roundTxt = document.createElement("div");
         this.roundTxt.innerText = "Score : 0 pts";
         content.appendChild(this.roundTxt);
+
+
+
+
+
+        this.endDiv = document.createElement("div");
+        this.endDiv.className = "endDiv";
+        this.endDiv.style.display = "none";
+        
+        this.endTxt = document.createElement("h2");
+        this.endTxt.className = "endTxt";
+        this.endTxt.innerText = "You've got XX pts !";
+
+        this.endDiv.appendChild(this.endTxt);
+
+
+        let endBtn = document.createElement("button");
+        endBtn.className = "endBtn";
+        endBtn.innerText = "Replay";
+
+        this.endDiv.appendChild(endBtn);
+
+        endBtn.addEventListener ("click",function(){
+            game.Replay();
+        });
+        
+        document.body.appendChild(this.endDiv);
         
 
 
@@ -78,9 +107,9 @@ class QuizDiv {
 
         // console.log(game.cityToGuess)
 
-        this.nextBtn.addEventListener ("click",function(){
-            game.NextGuess();
-        });
+        // this.nextBtn.addEventListener ("click",function(){
+        //     game.NextGuess();
+        // });
 
 
         this.validateGuessBtn.addEventListener ("click",function(){
@@ -101,7 +130,25 @@ class QuizDiv {
 
     public UpdateScore(score) {
         this.scoreTxt.innerText = `Score : ${score} pts`;
+        this.endTxt.innerText = `You've got : ${score} pts !`;
     }
+
+    
+    public ToggleEndDivVisibility(){
+        console.log("🚀 ~ file: quizDiv.ts ~ line 137 ~ QuizDiv ~ ToggleEndDivVisibility ~ this.endDiv.style.display", this.endDiv.style.display)
+        if(this.endDiv.style.display == "none"){
+
+            this.endDiv.style.display = "flex";
+        }
+        else{
+            this.endDiv.style.display = "none";
+        }
+
+    }
+
+    
+
+
 
 
 }

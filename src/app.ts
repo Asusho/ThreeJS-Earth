@@ -23,8 +23,6 @@ class App {
 		renderer.setSize(width, height);
 		document.body.appendChild(renderer.domElement);
 
-		console.log(renderer);
-
 		const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera(45, width / height, 0.01, 10000);
 

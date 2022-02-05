@@ -8,6 +8,9 @@ import * as UTILS from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import vShader from './shaders/vertexShader.glsl.js';
 import fShader from './shaders/fragmentShader.glsl.js';
 
+import atmosphereVertexShader from './shaders/atmosphereVertexShader.glsl.js';
+import atmosphereFragmentShader from './shaders/atmosphereFragmentShader.glsl.js';
+
 import { GeoJsonGeometry } from 'three-geojson-geometry';
 
 
@@ -69,6 +72,27 @@ class Earth {
         scene.add(directionalLight);
 
 
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.update();
+
+        controls.mouseButtons = {
+            RIGHT: THREE.MOUSE.ROTATE,
+            MIDDLE: null,
+            LEFT: null
+        }
+
+        controls.touches = {
+            ONE: THREE.TOUCH.ROTATE,
+            TWO: null,
+        }
+
+        controls.minDistance = 1.1 * this.RADIUS;
+        controls.maxDistance = 5 * this.RADIUS;
+
+        camera.position.set(0, 0, 2 * this.RADIUS);
+
+
+
 
 
         var earthGeometry = new THREE.IcosahedronGeometry(this.RADIUS, this.RESOLUTION);
@@ -97,6 +121,9 @@ class Earth {
         earthNormalMap.magFilter = THREE.NearestFilter;
 
 
+        let borderColor = new THREE.Vector4(1.0, 1.0, 1.0, 1.0);
+
+
 
 
         var self = this;
@@ -110,7 +137,6 @@ class Earth {
 
 
         let mouseOverPoint = new THREE.Vector3();
-        console.log(mouseOverPoint);
 
 
         function onMouseMove(event) {
@@ -148,10 +174,6 @@ class Earth {
                 type: geometry.type,
                 geometry: geometry.coordinates
             }
-
-            if (properties.ADMIN == "Spain") {
-                console.log(geometry.coordinates)
-            }
             country.geometry.forEach(el => {
                 el.map(e => new THREE.Vector2(e[0], e[1]))
             })
@@ -159,10 +181,9 @@ class Earth {
 
         });
 
-        let scale = 3;
+        let scale = 2;
         const width = scale * 3600;
         const height = scale * 1800;
-        console.log(this.RADIUS)
         const size = width * height;
         let data = new Uint8Array(4 * size);
 
@@ -173,91 +194,64 @@ class Earth {
         const b = Math.floor(color.b * 255);
 
 
-        let countryTest = countries[0];
-        // countryTest.geometry[0].forEach(pt => {
-        //     let x = (pt[0] + 180) * (width / 360);
-
-        //             let latRad = -pt[1] * Math.PI / 180;
-
-        //             // get y value
-        //             let mercN = Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
-        //             let y = (height / 2) - (width * mercN / (2 * Math.PI));
-
-        //             // if(x) console.log(x,y)
-
-        //             x = Math.floor(x);
-        //             y = Math.floor(y);
-
-        //             console.log(x,y)
-
-
-
-        //             data[4 * x + width * y*4] = r;
-        //             data[4 * x + width * y*4 + 1] = g;
-        //             data[4 * x + width * y*4 + 2] = b;
-        //             data[4 * x + width * y*4 + 3] = 255;
-
-        // });
-
-        console.log(countries[0]);
-
         countries.forEach(country => {
-            if (country.type == "MultiPolygon") {
-                country.geometry.forEach(geo => {
-                    geo = geo[0]
-                    geo.forEach(point => {
+            country.geometry.forEach(geo => {
+                if (country.type == "MultiPolygon") geo = geo[0]
 
-                        // -180 -> 180
-                        let x = scale * 10 * (point[0] + 180);
-                        // -90 -> 90
-                        let y = scale * 10 * (point[1] + 90);
-
-                        x = Math.floor(x);
-                        y = Math.floor(y);
+                let last_point = null;
+                geo.forEach(point => {
 
 
 
+                    // long : -180 -> 180
+                    let x = scale * 10 * (point[0] + 180);
+                    // lat : -90 -> 90
+                    let y = scale * 10 * (point[1] + 90);
 
-                        data[4 * x + width * y * 4] = r;
-                        data[4 * x + width * y * 4 + 1] = g;
-                        data[4 * x + width * y * 4 + 2] = b;
-                        data[4 * x + width * y * 4 + 3] = 255;
+                    x = Math.round(x);
+                    y = Math.round(y);
 
-                    });
+
+                    if (last_point != null) {
+
+                        let vec = new THREE.Vector2(x - last_point.x, y - last_point.y);
+                        let len = vec.length()
+                        let dir = vec.normalize();
+                        // if(len>1){
+                        //     console.log("length" + len);
+                        //     console.log(vec)
+                        //     console.log(x,y)
+                        //     console.log(last_point)
+                        //     console.log(country.name)
+
+                        // } 
+                        for (let index = 0; index <= len; index++) {
+
+
+                            let xp = last_point.x + index * dir.x;
+                            let yp = last_point.y + index * dir.y;
+
+                            xp = Math.round(xp);
+                            yp = Math.round(yp);
+
+
+                            data[4 * xp + width * yp * 4] = r;
+                            data[4 * xp + width * yp * 4 + 1] = g;
+                            data[4 * xp + width * yp * 4 + 2] = b;
+                            data[4 * xp + width * yp * 4 + 3] = 255;
+                        }
+                    }
+
+                    last_point = new THREE.Vector2(x, y);
+
                 });
-            }
-            else {
-                country.geometry.forEach(geo => {
-                    geo.forEach(point => {
-
-                        // -180 -> 180
-                        let x = scale * 10 * (point[0] + 180);
-                        // -90 -> 90
-                        let y = scale * 10 * (point[1] + 90);
-
-                        x = Math.floor(x);
-                        y = Math.floor(y);
-
-
-
-
-                        data[4 * x + width * y * 4] = r;
-                        data[4 * x + width * y * 4 + 1] = g;
-                        data[4 * x + width * y * 4 + 2] = b;
-                        data[4 * x + width * y * 4 + 3] = 255;
-
-                    });
-                });
-
-            }
-
-
+                last_point = null;
+            });
         });
 
 
         let dataTexture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
-        console.log(dataTexture)
-        console.log(earthDiffuseMap)
+
         dataTexture.needsUpdate = true;
         earthBordersMap = dataTexture;
 
@@ -268,6 +262,7 @@ class Earth {
             texture1: { type: 'sampler2D', value: earthDiffuseMap },
             normalMap: { type: 'sampler2D', value: earthNormalMap },
             borderMap: { type: 'sampler2D', value: earthBordersMap },
+            borderColor: { type: 'vec4', value: borderColor },
             mousePos: { type: 'vec3', value: mouse },
             resolution: { type: "vec2", value: new THREE.Vector2(renderer.domElement.width, renderer.domElement.height) },
             heightMap: { type: 'sampler2D', value: earthHeightMap },
@@ -323,25 +318,58 @@ class Earth {
 
 
 
+        // Add Atmosphere
+        let camDir = new THREE.Vector3();
+        camera.getWorldDirection(camDir)
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.update();
+        camDir.multiplyScalar(-1.0);
+        camDir.normalize();
 
-        controls.mouseButtons = {
-            RIGHT: THREE.MOUSE.ROTATE,
-            MIDDLE: null,
-            LEFT: null
-        }
+        let dist = controls.getDistance() - self.RADIUS;
+        let max_dist = controls.maxDistance - self.RADIUS;
 
-        controls.touches = {
-            ONE: null,
-            TWO: THREE.TOUCH.ROTATE,
-        }
+        var atmosphereMaterial = new THREE.ShaderMaterial({
+            vertexShader: atmosphereVertexShader,
+            fragmentShader: atmosphereFragmentShader,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            uniforms: {
+                cameraDirection: { type: 'vec3', value: camDir },
+                cameraDistance: { type: 'float', value: dist / max_dist }
+            }
+        });
 
-        controls.minDistance = 1.1 * this.RADIUS;
-        controls.maxDistance = 5 * this.RADIUS;
+        var atmosphere = new THREE.Mesh(
+            new THREE.IcosahedronGeometry(this.RADIUS, this.RESOLUTION),
+            atmosphereMaterial
 
-        camera.position.set(0, 0, 2 * this.RADIUS);
+        );
+        atmosphere.name = "atmosphere";
+        atmosphere.scale.set(1.02, 1.02, 1.02);
+
+        scene.add(atmosphere);
+
+
+
+
+        let skyboxTexture = new THREE.TextureLoader().load("./Images/starmap.jpg");
+        skyboxTexture.minFilter = THREE.NearestFilter;
+        skyboxTexture.magFilter = THREE.NearestFilter;
+
+
+        const skyboxGeometry = new THREE.SphereGeometry( 1000, 128, 128 );
+        const skyboxMaterial = new THREE.MeshBasicMaterial( {
+            map: skyboxTexture,
+            side: THREE.BackSide
+        } );
+        const skybox = new THREE.Mesh( skyboxGeometry, skyboxMaterial );
+        scene.add( skybox );
+
+        // scene.background = new THREE.TextureLoader().load("./Images/pinTexture.png");
+
+            // scene.background = new THREE.Color( "0xffffff" );
+
+
 
 
         function eerp(a, b, t) {
@@ -361,6 +389,15 @@ class Earth {
 
 
             material.uniforms.mousePos.value = mouse;
+
+            camera.getWorldDirection(camDir);
+
+            camDir.multiplyScalar(-1.0);
+            camDir.normalize();
+
+            atmosphereMaterial.uniforms.cameraDirection.value = camDir;
+            atmosphereMaterial.uniforms.cameraDistance.value = dist / max_dist;
+
 
 
 

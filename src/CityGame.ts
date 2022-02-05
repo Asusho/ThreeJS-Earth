@@ -10,6 +10,8 @@ import { SingleEntryPlugin } from "webpack";
 import { Earth } from "./earth";
 import { QuizDiv } from "./quizDiv";
 
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
 
 
 // import * as capitalsJSON from './data/capitals.geojson'; // This import style requires "esModuleInterop", see "side notes"
@@ -35,41 +37,90 @@ class CityGame {
 
     private score = 0;
 
+    public loader;
+
+    public prevGuesses;
+
+    public pins;
+    public pointMesh;
 
 
-    public addScore(distance){
+    public Replay() {
+        this.quizDiv.ToggleEndDivVisibility();
 
-        if(distance < 100){
+        this.Reset();
+        this.pins.forEach(pin => {
+            this.scene.remove(pin);
+        });
+        this.pins = [];
+
+    }
+
+    private Reset() {
+        this.current_round = -1;
+        this.score = 0;
+        this.prevGuesses = [];
+        this.guessPoint = null;
+        this.pointMesh = null;
+        this.NextGuess();
+
+
+    }
+
+
+    public addScore(distance) {
+
+        if (distance < 100) {
             this.score += 1000;
         }
-        else{
-            if(distance < 2000){
-                this.score += Math.round(2535 - 333.5*Math.log(distance)); 
-                
+        else {
+            if (distance < 2000) {
+                this.score += Math.round(2535 - 333.5 * Math.log(distance));
+
             }
         }
     }
 
-    public getScore(){
+    public getScore() {
         return this.score;
     }
 
+    public async load3DModel() {
+        let mesh = undefined;
+        let STATUS = "WAITING";
+        return this.loader.loadAsync('./Images/pin.glb');
+    }
 
-    public drawCityFromLongLat(scene, city, color) {
+
+    public async drawCityFromLongLat(scene, city, color) {
         let { x, y, z } = this.earth.convertLongLatToSpherePos(city.long, city.lat);
 
-        let sphere = new THREE.SphereGeometry(this.earth.RADIUS/200, 8, 8);
+        // let sphere = new THREE.SphereGeometry(this.earth.RADIUS / 200, 8, 8);
 
-        var cityMat = new THREE.MeshBasicMaterial({
-            color: new THREE.Color(color)
-        });
+        // var cityMat = new THREE.MeshBasicMaterial({
+        //     color: new THREE.Color(color)
+        // });
 
-        let cityMesh = new THREE.Mesh(sphere, cityMat);
+        // let cityMesh = new THREE.Mesh(sphere, cityMat);
 
-        cityMesh.position.set(x, y, z);
-        scene.add(cityMesh);
-        return cityMesh;
+        // cityMesh.position.set(x, y, z);
+        // scene.add(cityMesh);
+
+        let cityMesh = this.load3DModel();
+        let mesh = null;
+        await cityMesh.then(res => {
+            scene.add(res.scene);
+            res.scene.position.set(x, y, z);
+            mesh = res.scene;
+            mesh.lookAt(0, 0, 0)
+        })
+
+        return mesh;
+
     }
+
+
+
 
     public getRandomInt(max) {
         return Math.floor(Math.random() * max);
@@ -77,14 +128,22 @@ class CityGame {
 
     public NextGuess() {
         this.current_round++;
+        console.log("🚀 ~ file: CityGame.ts ~ line 111 ~ CityGame ~ NextGuess ~ current_round", this.current_round)
+        this.prevGuesses.push(this.cityToGuess);
         if (this.current_round < MAX_ROUND) {
-            let index = this.getRandomInt(this.cities.length);
 
-            this.cityToGuess = this.cities[index];
+            do {
+                let index = this.getRandomInt(this.cities.length);
+                this.cityToGuess = this.cities[index];
+            } while (this.prevGuesses.includes(this.cityToGuess))
+
             console.log(this.cityToGuess);
 
-            this.quizDiv.UpdateRound(this.current_round,MAX_ROUND);
+            this.quizDiv.UpdateRound(this.current_round, MAX_ROUND);
             this.quizDiv.UpdateCityToGuess(this.cityToGuess.name, this.cityToGuess.country);
+        }
+        else {
+            this.quizDiv.ToggleEndDivVisibility();
         }
     }
 
@@ -93,7 +152,7 @@ class CityGame {
         for (let i = 0; i <= 20; i++) {
             let p = new THREE.Vector3().lerpVectors(p1, p2, i / 20)
             p.normalize()
-            p.multiplyScalar(this.earth.RADIUS + this.earth.RADIUS/ 20 * Math.sin(Math.PI * i / 20));
+            p.multiplyScalar(this.earth.RADIUS + this.earth.RADIUS / 20 * Math.sin(Math.PI * i / 20));
             pts.push(p)
         }
 
@@ -108,6 +167,8 @@ class CityGame {
         const curveObject = new THREE.Line(geometry, material);
         this.scene.add(curveObject);
 
+        this.pins.push(curveObject);
+
         // console.log(curveObject)
 
     }
@@ -119,8 +180,12 @@ class CityGame {
 
         let R = 6378;
 
-        this.drawCityFromLongLat(this.scene, { long: city.coordinates.x, lat: city.coordinates.y }, 0xff0000);
-        this.drawCityFromLongLat(this.scene, { long: guess.long, lat: guess.lat }, 0x0000ff);
+        let tmp1 = this.drawCityFromLongLat(this.scene, { long: city.coordinates.x, lat: city.coordinates.y }, 0xff0000);
+        let tmp2 = this.drawCityFromLongLat(this.scene, { long: guess.long, lat: guess.lat }, 0x0000ff);
+        tmp1.then(res => { this.pins.push(res); })
+        tmp2.then(res => { this.pins.push(res); })
+
+
         let lat1 = city.coordinates.y * Math.PI / 180;
         let lat2 = guess.lat * Math.PI / 180;
         let lng1 = city.coordinates.x * Math.PI / 180;
@@ -138,7 +203,7 @@ class CityGame {
         this.addScore(distance);
         this.quizDiv.UpdateScore(this.score);
 
-        console.log("distance : " + distance + "km");
+        // console.log("distance : " + distance + "km");
 
 
         let p1 = this.earth.convertLongLatToSpherePos(guess.long, guess.lat);
@@ -156,49 +221,67 @@ class CityGame {
 
 
     constructor(scene, camera, earth, renderer) {
+        var self = this;
         function onMouseClick(event) {
 
-            // calculate mouse position in normalized device coordinates
-            // (-1 to +1) for both components
+            if (event.target.tagName.toLowerCase() == "canvas") {
 
-            mouse.x = (event.clientX / renderer.domElement.width) * 2 - 1;
-            mouse.y = - (event.clientY / renderer.domElement.height) * 2 + 1;
+                // calculate mouse position in normalized device coordinates
+                // (-1 to +1) for both components
 
-            // update the picking ray with the camera and mouse position
-            raycaster.setFromCamera(mouse, camera);
+                mouse.x = (event.clientX / renderer.domElement.width) * 2 - 1;
+                mouse.y = - (event.clientY / renderer.domElement.height) * 2 + 1;
 
-            var objs = raycaster?.intersectObjects(scene.children);
-            var obj = raycaster?.intersectObjects(scene.children)[0];
+                // update the picking ray with the camera and mouse position
+                raycaster.setFromCamera(mouse, camera);
 
-            for (let element of objs) {
-                if (element.object.name == "earth") {
-                    obj = element;
-                    break;
+                var objs = raycaster?.intersectObjects(scene.children);
+                var obj = raycaster?.intersectObjects(scene.children)[0];
+
+                for (let element of objs) {
+                    if (element.object.name == "earth") {
+                        obj = element;
+                        break;
+                    }
+
                 }
+                let clickedPoint = obj?.point;
 
+
+                if (self.pointMesh == null) {
+
+
+                    self.pointMesh = self.drawCityFromLongLat(scene, earth.convertSpherePosToLongLat(clickedPoint.x, clickedPoint.y, clickedPoint.z), 0xffffff);
+                    self.pointMesh.then(res => {
+                        self.pointMesh = res;
+                        self.pins.push(self.pointMesh);
+                        self.guessPoint = earth.convertSpherePosToLongLat(clickedPoint.x, clickedPoint.y, clickedPoint.z);
+                    })
+
+                }
+                else {
+
+                    if (clickedPoint) {
+
+                        self.pointMesh.position.set(clickedPoint.x, clickedPoint.y, clickedPoint.z);
+                        self.guessPoint = earth.convertSpherePosToLongLat(clickedPoint.x, clickedPoint.y, clickedPoint.z);
+                        self.pointMesh.lookAt(0, 0, 0)
+                    }
+                }
+                // console.log(earth.convertSpherePosToLongLat(clickedPoint.x,clickedPoint.y,clickedPoint.z))
             }
-            let clickedPoint = obj?.point;
 
-            console.log(clickedPoint);
-
-            if (pointMesh == null) pointMesh = self.drawCityFromLongLat(scene, { long: 0, lat: 0 }, 0xffffff);
-
-            if (clickedPoint) {
-
-                pointMesh.position.set(clickedPoint.x, clickedPoint.y, clickedPoint.z);
-
-                self.guessPoint = earth.convertSpherePosToLongLat(clickedPoint.x, clickedPoint.y, clickedPoint.z);
-            }
-            // console.log(earth.convertSpherePosToLongLat(clickedPoint.x,clickedPoint.y,clickedPoint.z))
         }
 
         this.earth = earth;
 
-        var self = this;
+        this.loader = new GLTFLoader();
+
 
         this.scene = scene;
+        this.pins = [];
 
-        let pointMesh: THREE.Mesh = null;
+        this.pointMesh = null;
 
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
@@ -258,15 +341,20 @@ class CityGame {
         let index = getRandomInt(this.cities.length);
 
         this.cityToGuess = this.cities[index];
-        console.log(this.cityToGuess);
-
-
 
 
         this.quizDiv = new QuizDiv(self);
 
-        this.quizDiv.UpdateRound(this.current_round,MAX_ROUND);
+        this.quizDiv.UpdateRound(this.current_round, MAX_ROUND);
         this.quizDiv.UpdateCityToGuess(this.cityToGuess.name, this.cityToGuess.country);
+
+
+
+
+
+        this.prevGuesses = [];
+
+
 
     }
 
