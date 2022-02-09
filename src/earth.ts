@@ -74,7 +74,7 @@ class Earth {
 
         controls.mouseButtons = {
             RIGHT: THREE.MOUSE.ROTATE,
-            MIDDLE: null,
+            MIDDLE: THREE.MOUSE.DOLLY,
             LEFT: null
         }
 

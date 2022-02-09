@@ -38,29 +38,30 @@ class QuizDiv {
         this.cityToGuessText = document.createElement("div");
 
         this.cityToGuessText.innerText = "Geo quiz - World Capitals";
+        this.cityToGuessText.className = "guessTxt";
         content.appendChild(this.cityToGuessText);
 
 
 
 
-        let d = document.createElement("div");
         this.validateGuessBtn = document.createElement("button");
         this.validateGuessBtn.className = "validateBtn";
         this.validateGuessBtn.innerText = "Guess";
 
 
-        d.appendChild(this.validateGuessBtn);
+        content.appendChild(this.validateGuessBtn);
 
-        content.appendChild(d);
 
 
 
         this.scoreTxt = document.createElement("div");
         this.scoreTxt.innerText = "Score : 0 pts";
+        this.scoreTxt.className = "scoreTxt";
         content.appendChild(this.scoreTxt);
 
         this.roundTxt = document.createElement("div");
-        this.roundTxt.innerText = "Score : 0 pts";
+        this.roundTxt.innerText = "Round 0";
+        this.roundTxt.className = "roundTxt";
         content.appendChild(this.roundTxt);
 
         this.endDiv = document.createElement("div");
