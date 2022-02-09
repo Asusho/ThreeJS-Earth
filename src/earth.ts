@@ -80,13 +80,13 @@ class Earth {
 
         controls.touches = {
             ONE: THREE.TOUCH.ROTATE,
-            TWO: THREE.TOUCH.DOLLY_PAN,
+            TWO: THREE.TOUCH.DOLLY_ROTATE,
         }
 
         controls.minDistance = 1.1 * this.RADIUS;
         controls.maxDistance = 5 * this.RADIUS;
 
-        camera.position.set(0, 0, 2 * this.RADIUS);
+        camera.position.set(0, 0, 3 * this.RADIUS);
 
 
 
