@@ -1,20 +1,11 @@
 
 import * as THREE from "three"
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import * as loader from "ts-loader/dist";
-
-
-import vShader from './shaders/vertexShader.glsl.js';
-import fShader from './shaders/fragmentShader.glsl.js';
-import { SingleEntryPlugin } from "webpack";
 import { Earth } from "./earth";
 import { QuizDiv } from "./quizDiv";
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 
-
-// import * as capitalsJSON from './data/capitals.geojson'; // This import style requires "esModuleInterop", see "side notes"
 
 const MAX_ROUND = 10;
 
@@ -95,17 +86,6 @@ class CityGame {
     public async drawCityFromLongLat(scene, city, color) {
         let { x, y, z } = this.earth.convertLongLatToSpherePos(city.long, city.lat);
 
-        // let sphere = new THREE.SphereGeometry(this.earth.RADIUS / 200, 8, 8);
-
-        // var cityMat = new THREE.MeshBasicMaterial({
-        //     color: new THREE.Color(color)
-        // });
-
-        // let cityMesh = new THREE.Mesh(sphere, cityMat);
-
-        // cityMesh.position.set(x, y, z);
-        // scene.add(cityMesh);
-
         let cityMesh = this.load3DModel();
         let mesh = null;
         await cityMesh.then(res => {
@@ -128,7 +108,6 @@ class CityGame {
 
     public NextGuess() {
         this.current_round++;
-        console.log("🚀 ~ file: CityGame.ts ~ line 111 ~ CityGame ~ NextGuess ~ current_round", this.current_round)
         this.prevGuesses.push(this.cityToGuess);
         if (this.current_round < MAX_ROUND) {
 
@@ -136,8 +115,6 @@ class CityGame {
                 let index = this.getRandomInt(this.cities.length);
                 this.cityToGuess = this.cities[index];
             } while (this.prevGuesses.includes(this.cityToGuess))
-
-            console.log(this.cityToGuess);
 
             this.quizDiv.UpdateRound(this.current_round, MAX_ROUND);
             this.quizDiv.UpdateCityToGuess(this.cityToGuess.name, this.cityToGuess.country);
@@ -169,14 +146,11 @@ class CityGame {
 
         this.pins.push(curveObject);
 
-        // console.log(curveObject)
-
     }
 
 
 
     public ValidateGuess(city, guess) {
-        // console.log("Guess");
 
         let R = 6378;
 
@@ -193,28 +167,19 @@ class CityGame {
 
         let sinP1 = Math.sin((lat1 - lat2) / 2)
         let sinP2 = Math.sin((lng1 - lng2) / 2)
-
-        // console.log(guess);
-
-        // console.log(city);
+        
         let distance = 2 * R * Math.asin(Math.sqrt(sinP1 * sinP1 + Math.cos(lat1) * Math.cos(lat2) * sinP2 * sinP2));
         distance = Math.round(distance);
+        console.log("🚀 ~ file: CityGame.ts ~ line 173 ~ CityGame ~ ValidateGuess ~ distance", distance)
 
         this.addScore(distance);
         this.quizDiv.UpdateScore(this.score);
-
-        // console.log("distance : " + distance + "km");
 
 
         let p1 = this.earth.convertLongLatToSpherePos(guess.long, guess.lat);
         let p2 = this.earth.convertLongLatToSpherePos(city.coordinates.x, city.coordinates.y)
 
-
-        // console.log(p1)
-        // console.log(p2)
-
         this.drawCurve(p1, p2);
-
 
         this.NextGuess();
     }
@@ -268,8 +233,7 @@ class CityGame {
                         self.pointMesh.lookAt(0, 0, 0)
                     }
                 }
-                // console.log(earth.convertSpherePosToLongLat(clickedPoint.x,clickedPoint.y,clickedPoint.z))
-            }
+           }
 
         }
 
@@ -289,34 +253,6 @@ class CityGame {
 
         window.addEventListener('click', onMouseClick, false);
 
-        // let Marseille = {
-        //     lat: 43.296482,
-        //     long: 5.36978
-
-        // }
-
-        // let Londres = {
-        //     lat: 51.482577,
-        //     long: -0.007659
-
-
-        // }
-
-        // let Lisbonne = {
-        //     lat: 38.736946,
-        //     long: -9.142685
-
-        // }
-
-
-        // this.drawCityFromLongLat(scene, Marseille, 0x0000ff);
-        // this.drawCityFromLongLat(scene, Londres, 0xff0000);
-        // this.drawCityFromLongLat(scene, Lisbonne, 0x00ff00);
-
-
-
-
-
 
         this.cities = [];
 
@@ -329,9 +265,6 @@ class CityGame {
 
             if (name && country && coords) this.cities.push(new City(name, coords, country));
         })
-        // console.log(this.cities);
-
-
 
 
         function getRandomInt(max) {
@@ -342,25 +275,15 @@ class CityGame {
 
         this.cityToGuess = this.cities[index];
 
-
         this.quizDiv = new QuizDiv(self);
 
         this.quizDiv.UpdateRound(this.current_round, MAX_ROUND);
         this.quizDiv.UpdateCityToGuess(this.cityToGuess.name, this.cityToGuess.country);
 
-
-
-
-
         this.prevGuesses = [];
 
-
-
     }
-
-
 }
-
 
 class City {
     public name;
@@ -373,8 +296,5 @@ class City {
         this.country = country;
     }
 }
-
-
-
 
 export { CityGame as CityGame };

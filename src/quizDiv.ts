@@ -16,7 +16,7 @@ class QuizDiv {
     public endDiv;
     public endTxt;
 
-    public game : CityGame;
+    public game: CityGame;
 
 
     constructor(game) {
@@ -51,12 +51,6 @@ class QuizDiv {
 
         d.appendChild(this.validateGuessBtn);
 
-        // this.nextBtn = document.createElement("button");
-        // this.nextBtn.className = "nextBtn";
-        // this.nextBtn.innerText = "Next";
-
-
-        // d.appendChild(this.nextBtn);
         content.appendChild(d);
 
 
@@ -69,14 +63,10 @@ class QuizDiv {
         this.roundTxt.innerText = "Score : 0 pts";
         content.appendChild(this.roundTxt);
 
-
-
-
-
         this.endDiv = document.createElement("div");
         this.endDiv.className = "endDiv";
         this.endDiv.style.display = "none";
-        
+
         this.endTxt = document.createElement("h2");
         this.endTxt.className = "endTxt";
         this.endTxt.innerText = "You've got XX pts !";
@@ -90,14 +80,11 @@ class QuizDiv {
 
         this.endDiv.appendChild(endBtn);
 
-        endBtn.addEventListener ("click",function(){
+        endBtn.addEventListener("click", function () {
             game.Replay();
         });
-        
+
         document.body.appendChild(this.endDiv);
-        
-
-
 
         var css = document.createElement('link');
         css.rel = 'stylesheet';
@@ -105,15 +92,9 @@ class QuizDiv {
         css.href = 'quiz.css';
         document.getElementsByTagName("head")[0].appendChild(css);
 
-        // console.log(game.cityToGuess)
 
-        // this.nextBtn.addEventListener ("click",function(){
-        //     game.NextGuess();
-        // });
-
-
-        this.validateGuessBtn.addEventListener ("click",function(){
-            game.ValidateGuess(game.cityToGuess,game.guessPoint);
+        this.validateGuessBtn.addEventListener("click", function () {
+            game.ValidateGuess(game.cityToGuess, game.guessPoint);
         });
 
     }
@@ -123,8 +104,8 @@ class QuizDiv {
         this.cityToGuessText.innerText = `You have to guess where ${name} (${country}) is placed on the map`;
     }
 
-    public UpdateRound(round,max_round){
-        this.roundTxt.innerText = `Round : ${round+1} / ${max_round}`;
+    public UpdateRound(round, max_round) {
+        this.roundTxt.innerText = `Round : ${round + 1} / ${max_round}`;
     }
 
 
@@ -133,25 +114,18 @@ class QuizDiv {
         this.endTxt.innerText = `You've got : ${score} pts !`;
     }
 
-    
-    public ToggleEndDivVisibility(){
-        console.log("🚀 ~ file: quizDiv.ts ~ line 137 ~ QuizDiv ~ ToggleEndDivVisibility ~ this.endDiv.style.display", this.endDiv.style.display)
-        if(this.endDiv.style.display == "none"){
+
+    public ToggleEndDivVisibility() {
+        if (this.endDiv.style.display == "none") {
 
             this.endDiv.style.display = "flex";
         }
-        else{
+        else {
             this.endDiv.style.display = "none";
         }
 
     }
 
-    
-
-
-
-
 }
-
 
 export { QuizDiv as QuizDiv };

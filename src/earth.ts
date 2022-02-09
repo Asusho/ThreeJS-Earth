@@ -1,9 +1,6 @@
 
 import * as THREE from "three"
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import * as loader from "ts-loader/dist";
-
-import * as UTILS from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 import vShader from './shaders/vertexShader.glsl.js';
 import fShader from './shaders/fragmentShader.glsl.js';
@@ -18,7 +15,7 @@ class Earth {
 
 
     public RADIUS = 50;
-    public RESOLUTION = 512;
+    public RESOLUTION = 128;
     public USE_WIREFRAME = false;
     public HEIGHT_SCALE = 0.03;
     public BIAS = 0;
@@ -100,25 +97,15 @@ class Earth {
         let loader = new THREE.TextureLoader();
 
         let earthDiffuseMap = loader.load("Images/uv3.jpg");
-        let earthBordersMap = loader.load("Images/borders.png");
+        let earthBordersMap = new THREE.DataTexture();
         let earthHeightMap = loader.load("Images/earth_heightmap.jpg");
-        let earthSpecularMap = loader.load("Images/specular.png");
-        let earthNormalMap = loader.load("Images/EarthNormal.png");
 
         earthDiffuseMap.minFilter = THREE.NearestFilter;
         earthDiffuseMap.magFilter = THREE.NearestFilter;
 
-        earthBordersMap.minFilter = THREE.NearestFilter;
-        earthBordersMap.magFilter = THREE.NearestFilter;
 
         earthHeightMap.minFilter = THREE.NearestFilter;
         earthHeightMap.magFilter = THREE.NearestFilter;
-
-        earthSpecularMap.minFilter = THREE.NearestFilter;
-        earthSpecularMap.magFilter = THREE.NearestFilter;
-
-        earthNormalMap.minFilter = THREE.NearestFilter;
-        earthNormalMap.magFilter = THREE.NearestFilter;
 
 
         let borderColor = new THREE.Vector4(1.0, 1.0, 1.0, 1.0);
@@ -127,27 +114,6 @@ class Earth {
 
 
         var self = this;
-
-
-
-        let raycaster = new THREE.Raycaster();
-        let mouse = new THREE.Vector2();
-        let mouse2 = new THREE.Vector2();
-        document.addEventListener('mousemove', onMouseMove, false);
-
-
-        let mouseOverPoint = new THREE.Vector3();
-
-
-        function onMouseMove(event) {
-            mouse.x = (event.clientX);
-            mouse.y = -(event.clientY - renderer.domElement.height);
-
-        }
-
-
-
-
 
 
 
@@ -187,12 +153,6 @@ class Earth {
         const size = width * height;
         let data = new Uint8Array(4 * size);
 
-        const color = new THREE.Color(0xffffff);
-
-        const r = Math.floor(color.r * 255);
-        const g = Math.floor(color.g * 255);
-        const b = Math.floor(color.b * 255);
-
 
         countries.forEach(country => {
             country.geometry.forEach(geo => {
@@ -217,14 +177,6 @@ class Earth {
                         let vec = new THREE.Vector2(x - last_point.x, y - last_point.y);
                         let len = vec.length()
                         let dir = vec.normalize();
-                        // if(len>1){
-                        //     console.log("length" + len);
-                        //     console.log(vec)
-                        //     console.log(x,y)
-                        //     console.log(last_point)
-                        //     console.log(country.name)
-
-                        // } 
                         for (let index = 0; index <= len; index++) {
 
 
@@ -235,9 +187,9 @@ class Earth {
                             yp = Math.round(yp);
 
 
-                            data[4 * xp + width * yp * 4] = r;
-                            data[4 * xp + width * yp * 4 + 1] = g;
-                            data[4 * xp + width * yp * 4 + 2] = b;
+                            data[4 * xp + width * yp * 4] = 255;
+                            data[4 * xp + width * yp * 4 + 1] = 255;
+                            data[4 * xp + width * yp * 4 + 2] = 255;
                             data[4 * xp + width * yp * 4 + 3] = 255;
                         }
                     }
@@ -260,10 +212,8 @@ class Earth {
 
         var uniforms = {
             texture1: { type: 'sampler2D', value: earthDiffuseMap },
-            normalMap: { type: 'sampler2D', value: earthNormalMap },
             borderMap: { type: 'sampler2D', value: earthBordersMap },
             borderColor: { type: 'vec4', value: borderColor },
-            mousePos: { type: 'vec3', value: mouse },
             resolution: { type: "vec2", value: new THREE.Vector2(renderer.domElement.width, renderer.domElement.height) },
             heightMap: { type: 'sampler2D', value: earthHeightMap },
             R: { type: 'float', value: this.RADIUS },
@@ -288,32 +238,6 @@ class Earth {
 
         scene.add(earthMesh);
 
-
-
-        // lineObjs.forEach((obj, index) => {
-        //     obj.rotation.y = -Math.PI / 2;
-        //     scene.add(obj)
-
-        //     // // Set a random color to the contry borders
-        //     // let color = new THREE.Color();
-        //     // color.setHex(Math.floor(Math.random() * 16777215))
-        //     // obj.material = [
-        //     //     new THREE.LineBasicMaterial({ color: color }), // outer ring
-        //     //     new THREE.LineBasicMaterial({ color: 'green' }) // inner holes
-        //     // ];
-
-        //     // change the color of first country
-        //     if (index == 0) {
-        //         obj.material = [
-        //             new THREE.LineBasicMaterial({ color: 'red' }), // outer ring
-        //             new THREE.LineBasicMaterial({ color: 'green' }) // inner holes
-        //         ];
-        //     }
-        // }
-        // );
-
-
-        // // console.log(lineObjs)
 
 
 
@@ -357,7 +281,7 @@ class Earth {
         skyboxTexture.magFilter = THREE.NearestFilter;
 
 
-        const skyboxGeometry = new THREE.SphereGeometry( 1000, 128, 128 );
+        const skyboxGeometry = new THREE.SphereGeometry( 5000, 32, 32 );
         const skyboxMaterial = new THREE.MeshBasicMaterial( {
             map: skyboxTexture,
             side: THREE.BackSide
@@ -365,13 +289,8 @@ class Earth {
         const skybox = new THREE.Mesh( skyboxGeometry, skyboxMaterial );
         scene.add( skybox );
 
-        // scene.background = new THREE.TextureLoader().load("./Images/pinTexture.png");
 
-            // scene.background = new THREE.Color( "0xffffff" );
-
-
-
-
+        // Exponential interpolation
         function eerp(a, b, t) {
             return Math.pow(a, 1 - t) * Math.pow(b, t)
         }
@@ -385,10 +304,8 @@ class Earth {
             let max_dist = controls.maxDistance - self.RADIUS;
             let speed = eerp(0.01, 100, dist / max_dist)
             if (speed > 1) speed = 1;
-            controls.rotateSpeed = speed
+            controls.rotateSpeed = speed;
 
-
-            material.uniforms.mousePos.value = mouse;
 
             camera.getWorldDirection(camDir);
 

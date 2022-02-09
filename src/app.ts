@@ -1,19 +1,10 @@
 
-import * as THREE from "three"
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import * as loader from "ts-loader/dist";
+import * as THREE from "three";
 import { CityGame } from "./CityGame";
 import { Earth } from "./earth";
-import { Test } from "./test";
-
-
 
 
 class App {
-
-
-
-
 
 	constructor() {
 
@@ -36,13 +27,9 @@ class App {
 			camera.updateProjectionMatrix();
 
 			renderer.setSize(window.innerWidth, window.innerHeight);
-
 		}
 
-
 		let earth = new Earth(scene, camera, renderer);
-		//new Test();
-
 		let game = new CityGame(scene, camera, earth, renderer);
 
 
