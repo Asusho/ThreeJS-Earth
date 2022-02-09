@@ -80,7 +80,7 @@ class Earth {
 
         controls.touches = {
             ONE: THREE.TOUCH.ROTATE,
-            TWO: null,
+            TWO: THREE.TOUCH.DOLLY_PAN,
         }
 
         controls.minDistance = 1.1 * this.RADIUS;
