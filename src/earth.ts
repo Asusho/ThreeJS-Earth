@@ -96,7 +96,7 @@ class Earth {
 
         let loader = new THREE.TextureLoader();
 
-        let earthDiffuseMap = loader.load("Images/uv3.jpg");
+        let earthDiffuseMap = globalThis.isMobileDevice ? loader.load("Images/uv3_mobile.jpg") : loader.load("Images/uv3.jpg");
         let earthBordersMap = new THREE.DataTexture();
         let earthHeightMap = loader.load("Images/earth_heightmap.jpg");
 
@@ -276,7 +276,7 @@ class Earth {
 
 
 
-        let skyboxTexture = new THREE.TextureLoader().load("./Images/starmap.jpg");
+        let skyboxTexture = globalThis.isMobileDevice ? loader.load("Images/starmap_mobile.jpg") :  loader.load("./Images/starmap.jpg");
         skyboxTexture.minFilter = THREE.NearestFilter;
         skyboxTexture.magFilter = THREE.NearestFilter;
 
