@@ -11,11 +11,12 @@ import atmosphereFragmentShader from './shaders/atmosphereFragmentShader.glsl.js
 import { GeoJsonGeometry } from 'three-geojson-geometry';
 
 
+
 class Earth {
 
 
     public RADIUS = 50;
-    public RESOLUTION = 128;
+    public RESOLUTION = globalThis.isMobileDevice? 64 : 128;
     public USE_WIREFRAME = false;
     public HEIGHT_SCALE = 0.03;
     public BIAS = 0;
@@ -118,38 +119,24 @@ class Earth {
 
 
         let json = require('./data/countries.json');
-
-        const alt = this.RADIUS + 0.2;
-
-        const lineObjs = [];
+        
         const countries = []
 
-        const materials = [
-            new THREE.LineBasicMaterial({ color: 'blue' }), // outer ring
-            new THREE.LineBasicMaterial({ color: 'green' }) // inner holes
-        ];
-
+       
         json.features.forEach(({ properties, geometry }, index) => {
-            lineObjs.push(new THREE.LineSegments(
-                new GeoJsonGeometry(geometry, alt),
-                materials
-            ));
+            
 
             let country = {
                 name: properties.ADMIN,
                 type: geometry.type,
                 geometry: geometry.coordinates
             }
-            country.geometry.forEach(el => {
-                el.map(e => new THREE.Vector2(e[0], e[1]))
-            })
             countries.push(country)
 
         });
 
         let scale = globalThis.isMobileDevice ? 1 : 4;
-        console.log("🚀 ~ file: earth.ts ~ line 151 ~ Earth ~ constructor ~ scale", scale)
-        const width = scale * 3600;
+const width = scale * 3600;
         const height = scale * 1800;
         const size = width * height;
         let data = new Uint8Array(4 * size);
@@ -203,8 +190,8 @@ class Earth {
         });
 
 
+
         let dataTexture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
-        console.log("🚀 ~ file: earth.ts ~ line 207 ~ Earth ~ constructor ~ dataTexture", dataTexture)
 
         dataTexture.needsUpdate = true;
         earthBordersMap = dataTexture;

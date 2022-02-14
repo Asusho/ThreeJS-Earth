@@ -102,7 +102,7 @@ class QuizDiv {
 
 
     public UpdateCityToGuess(name, country) {
-        this.cityToGuessText.innerText = `You have to guess where ${name} (${country}) is placed on the map`;
+        this.cityToGuessText.innerHTML = `You have to guess where <span class="city">${name}</span> <span class="country">(${country})</span> is placed on the map`;
     }
 
     public UpdateRound(round, max_round) {
