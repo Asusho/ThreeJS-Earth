@@ -54,6 +54,7 @@ class CityGame {
         this.guessPoint = null;
         this.pointMesh = null;
         this.NextGuess();
+        this.quizDiv.UpdateScore(0);
 
 
     }
