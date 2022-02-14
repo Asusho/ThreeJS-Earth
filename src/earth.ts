@@ -59,7 +59,7 @@ class Earth {
     constructor(scene, camera, renderer) {
 
 
-
+        console.log("🚀 ~ file: earth.ts ~ line 62 ~ Earth ~ constructor ~ globalThis.isMobileDevice", globalThis.isMobileDevice)
 
 
         // const ambientLight = new THREE.AmbientLight(0xffffff, 1); // soft white light
@@ -147,7 +147,7 @@ class Earth {
 
         });
 
-        let scale = 2;
+        let scale = globalThis.isMobileDevice ? 2 : 4;
         const width = scale * 3600;
         const height = scale * 1800;
         const size = width * height;
@@ -281,13 +281,13 @@ class Earth {
         skyboxTexture.magFilter = THREE.NearestFilter;
 
 
-        const skyboxGeometry = new THREE.SphereGeometry( 5000, 32, 32 );
-        const skyboxMaterial = new THREE.MeshBasicMaterial( {
+        const skyboxGeometry = new THREE.SphereGeometry(5000, 32, 32);
+        const skyboxMaterial = new THREE.MeshBasicMaterial({
             map: skyboxTexture,
             side: THREE.BackSide
-        } );
-        const skybox = new THREE.Mesh( skyboxGeometry, skyboxMaterial );
-        scene.add( skybox );
+        });
+        const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+        scene.add(skybox);
 
 
         // Exponential interpolation
