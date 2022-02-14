@@ -16,6 +16,9 @@ class App {
 
 	constructor() {
 
+		console.log("GeoQuiz");
+		
+
 		const renderer = new THREE.WebGLRenderer();
 		let height = window.innerHeight;
 		let width = window.innerWidth;
