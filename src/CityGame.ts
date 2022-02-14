@@ -109,6 +109,7 @@ class CityGame {
     public NextGuess() {
         this.current_round++;
         this.prevGuesses.push(this.cityToGuess);
+        this.pointMesh = null;
         if (this.current_round < MAX_ROUND) {
 
             do {
@@ -152,36 +153,39 @@ class CityGame {
 
     public ValidateGuess(city, guess) {
 
-        let R = 6378;
+        if(this.pointMesh){
+            let R = 6378;
 
-        let tmp1 = this.drawCityFromLongLat(this.scene, { long: city.coordinates.x, lat: city.coordinates.y }, 0xff0000);
-        let tmp2 = this.drawCityFromLongLat(this.scene, { long: guess.long, lat: guess.lat }, 0x0000ff);
-        tmp1.then(res => { this.pins.push(res); })
-        tmp2.then(res => { this.pins.push(res); })
-
-
-        let lat1 = city.coordinates.y * Math.PI / 180;
-        let lat2 = guess.lat * Math.PI / 180;
-        let lng1 = city.coordinates.x * Math.PI / 180;
-        let lng2 = guess.long * Math.PI / 180;
-
-        let sinP1 = Math.sin((lat1 - lat2) / 2)
-        let sinP2 = Math.sin((lng1 - lng2) / 2)
+            let tmp1 = this.drawCityFromLongLat(this.scene, { long: city.coordinates.x, lat: city.coordinates.y }, 0xff0000);
+            let tmp2 = this.drawCityFromLongLat(this.scene, { long: guess.long, lat: guess.lat }, 0x0000ff);
+            tmp1.then(res => { this.pins.push(res); })
+            tmp2.then(res => { this.pins.push(res); })
+    
+    
+            let lat1 = city.coordinates.y * Math.PI / 180;
+            let lat2 = guess.lat * Math.PI / 180;
+            let lng1 = city.coordinates.x * Math.PI / 180;
+            let lng2 = guess.long * Math.PI / 180;
+    
+            let sinP1 = Math.sin((lat1 - lat2) / 2)
+            let sinP2 = Math.sin((lng1 - lng2) / 2)
+            
+            let distance = 2 * R * Math.asin(Math.sqrt(sinP1 * sinP1 + Math.cos(lat1) * Math.cos(lat2) * sinP2 * sinP2));
+            distance = Math.round(distance);
+            console.log("🚀 ~ file: CityGame.ts ~ line 173 ~ CityGame ~ ValidateGuess ~ distance", distance)
+    
+            this.addScore(distance);
+            this.quizDiv.UpdateScore(this.score);
+    
+    
+            let p1 = this.earth.convertLongLatToSpherePos(guess.long, guess.lat);
+            let p2 = this.earth.convertLongLatToSpherePos(city.coordinates.x, city.coordinates.y)
+    
+            this.drawCurve(p1, p2);
+    
+            this.NextGuess();
+        }
         
-        let distance = 2 * R * Math.asin(Math.sqrt(sinP1 * sinP1 + Math.cos(lat1) * Math.cos(lat2) * sinP2 * sinP2));
-        distance = Math.round(distance);
-        console.log("🚀 ~ file: CityGame.ts ~ line 173 ~ CityGame ~ ValidateGuess ~ distance", distance)
-
-        this.addScore(distance);
-        this.quizDiv.UpdateScore(this.score);
-
-
-        let p1 = this.earth.convertLongLatToSpherePos(guess.long, guess.lat);
-        let p2 = this.earth.convertLongLatToSpherePos(city.coordinates.x, city.coordinates.y)
-
-        this.drawCurve(p1, p2);
-
-        this.NextGuess();
     }
 
 
@@ -201,7 +205,7 @@ class CityGame {
                 raycaster.setFromCamera(mouse, camera);
 
                 var objs = raycaster?.intersectObjects(scene.children);
-                var obj = raycaster?.intersectObjects(scene.children)[0];
+                var obj = null;
 
                 for (let element of objs) {
                     if (element.object.name == "earth") {
@@ -213,7 +217,7 @@ class CityGame {
                 let clickedPoint = obj?.point;
 
 
-                if (self.pointMesh == null) {
+                if (self.pointMesh == null && clickedPoint) {
 
 
                     self.pointMesh = self.drawCityFromLongLat(scene, earth.convertSpherePosToLongLat(clickedPoint.x, clickedPoint.y, clickedPoint.z), 0xffffff);
