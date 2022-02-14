@@ -147,7 +147,8 @@ class Earth {
 
         });
 
-        let scale = globalThis.isMobileDevice ? 2 : 4;
+        let scale = globalThis.isMobileDevice ? 1 : 4;
+        console.log("🚀 ~ file: earth.ts ~ line 151 ~ Earth ~ constructor ~ scale", scale)
         const width = scale * 3600;
         const height = scale * 1800;
         const size = width * height;
@@ -203,6 +204,7 @@ class Earth {
 
 
         let dataTexture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
+        console.log("🚀 ~ file: earth.ts ~ line 207 ~ Earth ~ constructor ~ dataTexture", dataTexture)
 
         dataTexture.needsUpdate = true;
         earthBordersMap = dataTexture;
