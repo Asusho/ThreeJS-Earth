@@ -12,6 +12,7 @@
     "license": "ISC",
     "dependencies": {
         "@types/geojson": "^7946.0.8",
+        "copy-webpack-plugin": "^10.2.4",
         "html-webpack-plugin": "^5.5.0",
         "three": "^0.136.0",
         "three-geojson-geometry": "^1.1.6",
