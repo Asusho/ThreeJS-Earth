@@ -1,8 +1,6 @@
 import * as loader from "ts-loader/dist";
 import { CityGame } from "./CityGame";
 
-
-
 class QuizDiv {
 
 
